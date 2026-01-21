@@ -1,190 +1,1367 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Simulador Martingala</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-      rel="stylesheet"
-    />
-    <style>
-      body {
-        background: linear-gradient(to right, #eef2f3, #8e9eab);
-        min-height: 100vh;
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="comercio.png" />
+  <title>Dashboard Martingala | Simulador Profesional</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            'montserrat': ['Montserrat', 'sans-serif'],
+          },
+          colors: {
+            'soft-blue': {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+            },
+            'soft-gray': {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              200: '#e2e8f0',
+              300: '#cbd5e1',
+              400: '#94a3b8',
+              500: '#64748b',
+              600: '#475569',
+              700: '#334155',
+              800: '#1e293b',
+              900: '#0f172a',
+            }
+          },
+          animation: {
+            'slide-in-left': 'slideInLeft 0.5s ease-out',
+            'slide-in-right': 'slideInRight 0.5s ease-out',
+            'slide-in-up': 'slideInUp 0.5s ease-out',
+            'fade-in-delay': 'fadeInDelay 0.8s ease-out',
+            'bounce-gentle': 'bounceGentle 2s ease-in-out infinite',
+          },
+          keyframes: {
+            slideInLeft: {
+              '0%': { transform: 'translateX(-100px)', opacity: '0' },
+              '100%': { transform: 'translateX(0)', opacity: '1' },
+            },
+            slideInRight: {
+              '0%': { transform: 'translateX(100px)', opacity: '0' },
+              '100%': { transform: 'translateX(0)', opacity: '1' },
+            },
+            slideInUp: {
+              '0%': { transform: 'translateY(50px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            },
+            fadeInDelay: {
+              '0%': { opacity: '0' },
+              '60%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            bounceGentle: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' },
+            }
+          }
+        }
       }
-      .simulator-box {
-        background-color: white;
-        border-radius: 20px;
-        box-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
-        padding: 30px;
-      }
-      .result-box {
-        height: 300px;
-        overflow-y: auto;
-        white-space: pre-wrap;
-        font-family: monospace;
-        background-color: #f8f9fa;
-        padding: 15px;
-        border-radius: 10px;
-        border: 1px solid #dee2e6;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container py-5">
-      <div class="simulator-box mx-auto col-lg-8 col-md-10 col-sm-12">
-        <div class="text-center mb-4">
-          <h2><i class="bi bi-graph-up-arrow"></i> Simulador de Martingala</h2>
-          <p class="text-muted">
-            Configura tus parámetros y simula el crecimiento diario
-          </p>
+    }
+  </script>
+</head>
+
+<body class="font-montserrat bg-soft-gray-50 min-h-screen">
+
+  <!-- Header Superior -->
+  <header class="bg-white border-b border-soft-gray-200 px-6 py-4 animate-slide-in-up">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <div class="w-12 h-12 bg-soft-blue-600 rounded-xl flex items-center justify-center">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6">
+            </path>
+          </svg>
         </div>
+        <div>
+          <h1 class="text-2xl font-bold text-soft-gray-800">Dashboard Martingala</h1>
+          <div>
 
-        <!-- Inputs -->
-        <form id="configForm" class="mb-4">
-          <div class="mb-3">
-            <label class="form-label"
-              ><i class="bi bi-sliders"></i> Multiplicadores (separados por
-              coma):</label
-            >
-            <input
-              type="text"
-              class="form-control"
-              id="multiplicadoresInput"
-              value="1, 2.13, 4.54, 9.68, 20.66, 44.15"
-            />
           </div>
 
-          <div class="row g-3 mb-3">
-            <div class="col-md-6">
-              <label class="form-label"
-                ><i class="bi bi-percent"></i> Payout (%):</label
-              >
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                max="1"
-                class="form-control"
-                id="payoutInput"
-                value="0.88"
-              />
-            </div>
 
-            <div class="col-md-6">
-              <label class="form-label"
-                ><i class="bi bi-123"></i> Entradas por día:</label
-              >
-              <input
-                type="number"
-                min="1"
-                class="form-control"
-                id="entradasInput"
-                value="6"
-              />
-            </div>
+
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-2">
+          <button id="graficoBtn" onclick="abrirGrafico()"
+            class="hidden w-8 h-8 bg-soft-blue-600 hover:bg-soft-blue-700 rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-110 shadow-md">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+              </path>
+            </svg>
+          </button>
+          <!-- Botón de configuración junto al Estado -->
+          <button id="configBtn" onclick="abrirConfiguracion()"
+            class="w-8 h-8 bg-soft-gray-100 hover:bg-soft-gray-200 rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-110 shadow-sm">
+            <svg class="w-4 h-4 text-soft-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M11.049 2.927c.3-.921 1.603-.921 1.902 0a1.724 1.724 0 002.3 1.117c.88-.37 1.833.385 1.463 1.264a1.724 1.724 0 001.116 2.3c.921.3.921 1.603 0 1.902a1.724 1.724 0 00-1.117 2.3c.37.88-.385 1.833-1.264 1.463a1.724 1.724 0 00-2.3 1.116c-.3.921-1.603.921-1.902 0a1.724 1.724 0 00-2.3-1.117c-.88.37-1.833-.385-1.463-1.264a1.724 1.724 0 00-1.116-2.3c-.921-.3-.921-1.603 0-1.902a1.724 1.724 0 001.117-2.3c-.37-.88.385-1.833 1.264-1.463.86.36 1.95-.08 2.3-1.116z">
+              </path>
+            </svg>
+          </button>
+          <div class="flex items-center space-x-2">
+            <p class="text-sm text-soft-gray-500">Estado:</p>
+            <p class="text-xl font-bold text-soft-blue-600" id="diaActual">Inicio</p>
           </div>
-
-          <div class="d-grid">
-            <button type="submit" class="btn btn-primary btn-lg">
-              <i class="bi bi-play-fill"></i> Simular Día
-            </button>
-          </div>
-        </form>
-
-        <!-- Resultados -->
-        <div id="resultados" class="result-box"></div>
+        </div>
+        <button onclick="simularDia()"
+          class="px-6 py-3 bg-soft-blue-600 hover:bg-soft-blue-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg flex items-center space-x-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m-9-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+            </path>
+          </svg>
+          <span>Simular Siguiente Día</span>
+        </button>
       </div>
     </div>
+  </header>
 
-    <script>
-      let dia = 1;
-      let multiplicadores = [1, 2.13, 4.54, 9.68, 20.66, 44.15];
-      let recursoInicial = multiplicadores.reduce((a, b) => a + b, 0);
-      let payout = 0.88;
-      let entradasPorDia = 6;
+  <!-- Dashboard Principal -->
+  <main class="p-6 space-y-6">
 
-      document
-        .getElementById("configForm")
-        .addEventListener("submit", function (e) {
-          e.preventDefault();
-          // Leer inputs
-          const multInput = document.getElementById(
-            "multiplicadoresInput"
-          ).value;
-          const payoutInput = parseFloat(
-            document.getElementById("payoutInput").value
-          );
-          const entradasInput = parseInt(
-            document.getElementById("entradasInput").value
-          );
+    <!-- Métricas Principales -->
+    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-slide-in-up">
 
-          const nuevosMultiplicadores = multInput
-            .split(",")
-            .map((v) => parseFloat(v.trim()))
-            .filter((v) => !isNaN(v));
+      <!-- Recurso Inicial -->
+      <div
+        class="bg-white rounded-2xl p-6 shadow-sm border border-soft-gray-200 hover:shadow-md transition-all duration-200">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+            <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1">
+              </path>
+            </svg>
+          </div>
+          <span class="text-xs font-medium text-soft-gray-500 bg-soft-gray-100 px-2 py-1 rounded-full">CAPITAL</span>
+        </div>
+        <h3 class="text-sm font-medium text-soft-gray-600 mb-1">Recurso Inicial</h3>
+        <p class="text-2xl font-bold text-soft-gray-800" id="recursoInicialDisplay">456.56</p>
+      </div>
 
-          if (
-            nuevosMultiplicadores.length === 0 ||
-            isNaN(payoutInput) ||
-            isNaN(entradasInput)
-          ) {
-            alert("Por favor ingresa valores válidos.");
-            return;
-          }
+      <!-- Ganancia Total -->
+      <div
+        class="bg-white rounded-2xl p-6 shadow-sm border border-soft-gray-200 hover:shadow-md transition-all duration-200">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3">
+              </path>
+            </svg>
+          </div>
+          <span class="text-xs font-medium text-soft-gray-500 bg-soft-gray-100 px-2 py-1 rounded-full">GANANCIA</span>
+        </div>
+        <h3 class="text-sm font-medium text-soft-gray-600 mb-1">Ganancia Día</h3>
+        <p class="text-2xl font-bold text-soft-gray-800" id="gananciaDisplay">0.00</p>
+      </div>
 
-          multiplicadores = nuevosMultiplicadores;
-          recursoInicial = multiplicadores.reduce((a, b) => a + b, 0);
-          payout = payoutInput;
-          entradasPorDia = entradasInput;
+      <!-- Total con Ganancia -->
+      <div
+        class="bg-white rounded-2xl p-6 shadow-sm border border-soft-gray-200 hover:shadow-md transition-all duration-200">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+              </path>
+            </svg>
+          </div>
+          <span class="text-xs font-medium text-soft-gray-500 bg-soft-gray-100 px-2 py-1 rounded-full">TOTAL</span>
+        </div>
+        <h3 class="text-sm font-medium text-soft-gray-600 mb-1">Total con Ganancia</h3>
+        <p class="text-2xl font-bold text-soft-gray-800" id="totalConGananciaDisplay">456.56</p>
+      </div>
 
-          simularDia();
-        });
+      <!-- Factor de Ajuste -->
+      <div
+        class="bg-white rounded-2xl p-6 shadow-sm border border-soft-gray-200 hover:shadow-md transition-all duration-200">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z">
+              </path>
+            </svg>
+          </div>
+          <span class="text-xs font-medium text-soft-gray-500 bg-soft-gray-100 px-2 py-1 rounded-full">FACTOR</span>
+        </div>
+        <h3 class="text-sm font-medium text-soft-gray-600 mb-1">Factor de Ajuste</h3>
+        <p class="text-2xl font-bold text-soft-gray-800" id="factorAjusteDisplay">1.0000</p>
+      </div>
 
-      function simularDia() {
-        const entradaBase = multiplicadores[0];
-        const gananciaTotal = +(entradaBase * entradasPorDia * payout).toFixed(
-          2
-        );
-        const totalConGanancia = +(recursoInicial + gananciaTotal).toFixed(2);
-        const factorAjuste = +(totalConGanancia / recursoInicial).toFixed(4);
+    </section>
 
-        const nuevosMultiplicadores = multiplicadores.map(
-          (m) => +(m * factorAjuste).toFixed(2)
-        );
-        const nuevoMultiplicador = nuevosMultiplicadores[1];
-        const nuevoPorcentaje = +(
-          (nuevoMultiplicador - entradaBase) *
-          100
-        ).toFixed(2);
+    <!-- Grid Principal: Multiplicadores y Historial -->
+    <section class="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
-        const resumen = `
-Día ${dia}:
-  Multiplicadores de Martingala:
-   - Día ${dia}: ${Math.round(nuevoPorcentaje)}% = ${nuevoMultiplicador}
-  Recurso inicial (total martingalas): ${recursoInicial}
-  Ganancia total (${entradasPorDia} entradas de ${entradaBase}): ${gananciaTotal}
-  Total con ganancia: ${totalConGanancia}
-  Factor de ajuste: ${factorAjuste}
-  Nuevos multiplicadores para el siguiente día: [${nuevosMultiplicadores.join(
-    ", "
-  )}]
-------------------------------------------------------------
-`;
+      <!-- Multiplicadores Martingala -->
+      <div class="xl:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-soft-gray-200 animate-slide-in-left">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-soft-blue-100 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-soft-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4">
+                </path>
+              </svg>
+            </div>
+            <h2 class="text-xl font-bold text-soft-gray-800">Multiplicadores Martingala</h2>
+          </div>
+          <span class="text-sm font-medium text-soft-gray-500 bg-soft-gray-100 px-3 py-1 rounded-full">8 Niveles</span>
+        </div>
 
-        const resultadosBox = document.getElementById("resultados");
-        resultadosBox.textContent += resumen;
-        resultadosBox.scrollTop = resultadosBox.scrollHeight;
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="multiplicadoresGrid">
+          <!-- Los multiplicadores se generarán dinámicamente aquí -->
+        </div>
+      </div>
 
-        recursoInicial = totalConGanancia;
-        multiplicadores = nuevosMultiplicadores;
-        dia++;
+      <!-- Historial de Simulaciones -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-soft-gray-200 animate-slide-in-right">
+        <div class="flex items-center space-x-3 mb-6">
+          <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <h2 class="text-xl font-bold text-soft-gray-800">Historial</h2>
+        </div>
+
+        <div class="space-y-3 max-h-96 overflow-y-auto" id="historialList">
+          <div class="text-center text-soft-gray-500 py-8">
+            <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+              </path>
+            </svg>
+            <p class="font-medium">Sin simulaciones aún</p>
+            <p class="text-sm">Ejecuta una simulación para ver el historial</p>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Estadísticas Comparativas -->
+    <section class="bg-white rounded-2xl p-6 shadow-sm border border-soft-gray-200 animate-fade-in-delay">
+      <div class="flex items-center space-x-3 mb-6">
+        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+          <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+        </div>
+        <h2 class="text-xl font-bold text-soft-gray-800">Comparativa vs Día 1</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="text-center p-4 bg-soft-gray-50 rounded-xl">
+          <p class="text-sm font-medium text-soft-gray-600 mb-2">Diferencia Absoluta</p>
+          <p class="text-2xl font-bold text-soft-gray-800" id="diferenciaDia1Display">$0.00</p>
+        </div>
+
+        <div class="text-center p-4 bg-soft-gray-50 rounded-xl">
+          <p class="text-sm font-medium text-soft-gray-600 mb-2">Porcentaje de Cambio</p>
+          <p class="text-2xl font-bold text-soft-gray-800" id="porcentajeCambioDisplay">0.00%</p>
+        </div>
+
+        <div class="text-center p-4 bg-soft-gray-50 rounded-xl">
+          <p class="text-sm font-medium text-soft-gray-600 mb-2">Nuevo Porcentaje</p>
+          <p class="text-2xl font-bold text-soft-gray-800" id="nuevoPorcentajeDisplay">0%</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal del Gráfico -->
+  <div id="graficoModal"
+    class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-4xl w-full max-h-[90vh] overflow-auto animate-slide-in-up">
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 bg-soft-blue-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-soft-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+              </path>
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold text-soft-gray-800">Análisis Gráfico de Rendimiento</h2>
+        </div>
+        <button onclick="cerrarGrafico()"
+          class="w-10 h-10 bg-soft-gray-100 hover:bg-soft-gray-200 rounded-xl flex items-center justify-center transition-all duration-200">
+          <svg class="w-5 h-5 text-soft-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Métricas del gráfico -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="bg-emerald-50 rounded-xl p-4 border border-emerald-200">
+          <div class="flex items-center space-x-2 mb-2">
+            <div class="w-3 h-3 bg-emerald-500 rounded-full"></div>
+            <p class="text-sm font-medium text-emerald-700">Capital Inicial</p>
+          </div>
+          <p class="text-xl font-bold text-emerald-800" id="capitalInicialGrafico">$456.56</p>
+        </div>
+
+        <div class="bg-blue-50 rounded-xl p-4 border border-blue-200">
+          <div class="flex items-center space-x-2 mb-2">
+            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+            <p class="text-sm font-medium text-blue-700">Ganancia del Día</p>
+          </div>
+          <p class="text-xl font-bold text-blue-800" id="gananciaDiaGrafico">$0.00</p>
+        </div>
+
+        <div class="bg-purple-50 rounded-xl p-4 border border-purple-200">
+          <div class="flex items-center space-x-2 mb-2">
+            <div class="w-3 h-3 bg-purple-500 rounded-full"></div>
+            <p class="text-sm font-medium text-purple-700">Total Acumulado</p>
+          </div>
+          <p class="text-xl font-bold text-purple-800" id="totalAcumuladoGrafico">$456.56</p>
+        </div>
+      </div>
+
+      <!-- Controles de navegación del gráfico -->
+      <div class="bg-soft-gray-50 rounded-2xl p-4 border border-soft-gray-200 mb-4 hidden" id="controlesNavegacion">
+        <div class="flex items-center justify-between">
+          <button onclick="navegarGrafico('anterior')" id="btnAnterior"
+            class="flex items-center px-4 py-2 bg-white hover:bg-soft-gray-100 text-soft-gray-700 font-medium rounded-lg border border-soft-gray-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Anterior
+          </button>
+
+          <div class="flex items-center space-x-4">
+            <div class="text-center">
+              <p class="text-sm font-medium text-soft-gray-600">Mostrando días</p>
+              <p class="text-lg font-bold text-soft-blue-600" id="rangoActual">1 - 10</p>
+            </div>
+            <div class="text-center">
+              <p class="text-sm font-medium text-soft-gray-600">Total de días</p>
+              <p class="text-lg font-bold text-soft-gray-800" id="totalDias">0</p>
+            </div>
+          </div>
+
+          <button onclick="navegarGrafico('siguiente')" id="btnSiguiente"
+            class="flex items-center px-4 py-2 bg-white hover:bg-soft-gray-100 text-soft-gray-700 font-medium rounded-lg border border-soft-gray-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+            Siguiente
+            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Canvas del gráfico -->
+      <div class="bg-soft-gray-50 rounded-2xl p-6 border border-soft-gray-200">
+        <div class="relative" style="height: 400px;">
+          <canvas id="graficoCanvas" class="w-full h-full"></canvas>
+        </div>
+      </div>
+
+      <!-- Leyenda -->
+      <div class="flex justify-center space-x-6 mt-6">
+        <div class="flex items-center space-x-2">
+          <div class="w-4 h-4 bg-emerald-500 rounded-full"></div>
+          <span class="text-sm font-medium text-soft-gray-700">Capital Inicial</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <div class="w-4 h-4 bg-blue-500 rounded-full"></div>
+          <span class="text-sm font-medium text-soft-gray-700">Ganancia Diaria</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <div class="w-4 h-4 bg-purple-500 rounded-full"></div>
+          <span class="text-sm font-medium text-soft-gray-700">Total Acumulado</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Configuración -->
+  <div id="configModal" class="fixed inset-0 bg-black/40 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 max-w-2xl w-full max-h-[90vh] overflow-auto animate-slide-in-up">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold">Configuración</h3>
+        <button onclick="cerrarConfiguracion()"
+          class="w-8 h-8 rounded-lg bg-soft-gray-100 hover:bg-soft-gray-200 flex items-center justify-center">✕</button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="inline-flex items-center mr-4">
+            <input type="radio" name="configTipo" value="1" checked onchange="mostrarTabConfig(1)" />
+            <span class="ml-2">Configuración 1 (ingresar multiplicadores)</span>
+          </label>
+          <label class="inline-flex items-center">
+            <input type="radio" name="configTipo" value="2" onchange="mostrarTabConfig(2)" />
+            <span class="ml-2">Configuración 2 (calcular desde USD + multiplicador)</span>
+          </label>
+        </div>
+
+        <!-- Config 1 -->
+        <div id="config1">
+          <div class="grid grid-cols-2 gap-3 mb-2">
+            <div>
+              <label class="text-sm font-medium">Cantidad de martingalas</label>
+              <input id="cfg1Cantidad" type="number" min="1" value="5" class="mt-1 w-full rounded-lg border p-2"
+                onchange="generarCamposConfig1()" />
+            </div>
+            <div>
+              <label class="text-sm font-medium">Cantidad de entradas</label>
+              <input id="cfg1Entradas" type="number" min="1" class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="text-sm font-medium">Payout (decimal)</label>
+              <input id="cfg1Payout" type="number" step="0.01" min="0" value="0.84"
+                class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="text-sm font-medium">Multiplicador (%)</label>
+              <input id="cfg1Multiplier" type="number" step="0.1" min="0" value="120"
+                class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+          </div>
+
+          <div id="cfg1Multiplicadores" class="space-y-2" style="max-height:240px; overflow-y:auto; padding-right:6px;">
+            <!-- Campos generados dinámicamente -->
+          </div>
+          <div class="mt-3">
+            <button onclick="previsualizarConfig1()"
+              class="px-4 py-2 bg-soft-blue-500 text-white rounded-lg">Previsualizar</button>
+          </div>
+        </div>
+
+        <!-- Config 2 -->
+        <div id="config2" class="hidden">
+          <div class="grid grid-cols-2 gap-3 mb-2 justify-items-end">
+            <div>
+              <label class="text-sm font-medium text-right">USD disponible</label>
+              <input id="cfg2UsdDisponible" type="number" step="0.01" min="0" value="456.48"
+                class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="text-sm font-medium text-right">USD ganancia (opcional)</label>
+              <input id="cfg2UsdGanancia" type="number" step="0.01" min="0" placeholder="Opcional"
+                class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="text-sm font-medium text-right">Multiplicador (%)</label>
+              <input id="cfg2Mul" type="number" step="1" min="0" value="120"
+                class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="text-sm font-medium text-right">Cantidad de martingalas</label>
+              <input id="cfg2Cantidad" type="number" min="1" placeholder="Ej: 5"
+                class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="text-sm font-medium text-right">Cantidad de entradas</label>
+              <input id="cfg2Entradas" type="number" min="1" placeholder="Ej: 1"
+                class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="text-sm font-medium text-right">Payout (decimal)</label>
+              <input id="cfg2Payout" type="number" step="0.01" min="0" value="0.84"
+                class="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label class="text-sm font-medium text-right">Entrada base (calculada)</label>
+              <input id="cfg2Base" type="number" step="0.01" min="0.01" value="1"
+                class="mt-1 w-full rounded-lg border p-2" readonly />
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <button onclick="previsualizarConfig2()"
+              class="px-4 py-2 bg-soft-blue-600 text-white rounded-lg">Previsualizar</button>
+          </div>
+
+          <div id="cfg2Preview" class="text-sm text-soft-gray-600"></div>
+        </div>
+
+        <div class="flex justify-end space-x-2 mt-4">
+          <button onclick="cerrarConfiguracion()" class="px-4 py-2 rounded-lg bg-soft-gray-100">Cancelar</button>
+          <button onclick="aplicarConfiguracion()"
+            class="px-4 py-2 rounded-lg bg-soft-blue-600 text-white">Aceptar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let dia = 1;
+    // Al cargar por primera vez, inicializamos en cero y mostramos el modal de configuración
+    let multiplicadores = [];
+    let recursoInicial = 0;
+    let recursoInicialDia1 = 0; // Guardamos el valor inicial del día 1 (ahora editable desde UI)
+    let patrimonioActual = 0; // Total con ganancia (no altera recursoInicialDia1)
+    let initialMultiplicadores = null; // copia de multiplicadores al aceptar configuración (referencia día 1)
+    let payout = 0.84;
+    let entriesCount = 0; // cantidad de entradas configurable desde UI
+    let historial = [];
+
+    // Inicializar la interfaz
+    document.addEventListener('DOMContentLoaded', function () {
+      // Mostrar todo en cero inicialmente
+      actualizarInterfaz();
+      renderizarMultiplicadores();
+      generarCamposConfig1();
+      // Abrir modal de configuración al inicio
+      abrirConfiguracion();
+    });
+
+    function actualizarInterfaz() {
+      const diaTexto = dia === 1 ? 'Inicio' : `Día ${dia - 1}`;
+      document.getElementById('diaActual').textContent = diaTexto;
+      document.getElementById('recursoInicialDisplay').textContent = `$${(recursoInicialDia1 || 0).toFixed(2)}`;
+      document.getElementById('totalConGananciaDisplay').textContent = `$${(patrimonioActual || recursoInicialDia1 || 0).toFixed(2)}`;
+      document.getElementById('factorAjusteDisplay').textContent = '1.0000';
+
+      // Mostrar/ocultar botón del gráfico
+      const graficoBtn = document.getElementById('graficoBtn');
+      if (dia > 1) {
+        graficoBtn.classList.remove('hidden');
+      } else {
+        graficoBtn.classList.add('hidden');
       }
-    </script>
-  </body>
+    }
+
+    function renderizarMultiplicadores() {
+      const grid = document.getElementById('multiplicadoresGrid');
+      grid.innerHTML = '';
+
+      multiplicadores.forEach((mult, index) => {
+        const card = document.createElement('div');
+        card.className = 'bg-soft-gray-50 rounded-xl p-4 border border-soft-gray-200 hover:border-soft-blue-300 transition-all duration-200 hover:shadow-md';
+
+        // Color diferente para el primer multiplicador (entrada base)
+        const isBase = index === 0;
+        const bgColor = isBase ? 'bg-soft-blue-100 border-soft-blue-200' : 'bg-soft-gray-50 border-soft-gray-200';
+        card.className = `${bgColor} rounded-xl p-4 hover:shadow-md transition-all duration-200`;
+
+        card.innerHTML = `
+          <div class="text-center">
+            <div class="w-8 h-8 mx-auto mb-2 ${isBase ? 'bg-soft-blue-600' : 'bg-soft-gray-400'} rounded-lg flex items-center justify-center">
+              <span class="text-white font-bold text-sm">${index + 1}</span>
+            </div>
+            <p class="text-xs font-medium text-soft-gray-600 mb-1">${isBase ? 'Base' : `Nivel ${index}`}</p>
+            <p class="text-lg font-bold ${isBase ? 'text-soft-blue-700' : 'text-soft-gray-800'}">${(+mult).toFixed(2)}</p>
+          </div>
+        `;
+
+        grid.appendChild(card);
+      });
+    }
+
+    // Simula un día usando los multiplicadores actuales, entradas y payout
+    function simularDia() {
+      if (!multiplicadores || multiplicadores.length === 0) {
+        alert('Configura primero los multiplicadores en Configuración.');
+        abrirConfiguracion();
+        return;
+      }
+
+      if (!entriesCount || entriesCount <= 0) {
+        alert('Configura la cantidad de entradas en Configuración (Config 1 o Config 2).');
+        abrirConfiguracion();
+        return;
+      }
+
+      const entradaBase = multiplicadores[0] || 0;
+      const gananciaTotal = +(entradaBase * entriesCount * payout).toFixed(2);
+
+      // Patrimonio previo (si es la primera simulación usamos recursoInicialDia1)
+      const patrimonioPrevio = (typeof patrimonioActual === 'number' && patrimonioActual > 0) ? patrimonioActual : (recursoInicialDia1 || 0);
+
+      // Actualizar patrimonio acumulativo
+      const nuevoPatrimonio = +(patrimonioPrevio + gananciaTotal).toFixed(2);
+
+      // evitar división por cero; factor relativo al patrimonio previo
+      const factorAjuste = (patrimonioPrevio && patrimonioPrevio > 0) ? +(nuevoPatrimonio / patrimonioPrevio).toFixed(4) : 1;
+
+      const nuevosMultiplicadores = multiplicadores.map(m => +(m * factorAjuste).toFixed(2));
+
+      // Actualizar historial con patrimonio acumulado
+      historial.unshift({ dia: dia, ganancia: gananciaTotal, total: nuevoPatrimonio, factor: factorAjuste });
+
+      // Actualizar valores para el siguiente día sin modificar el recurso inicial estático
+      patrimonioActual = nuevoPatrimonio;
+      multiplicadores = nuevosMultiplicadores;
+      dia++;
+
+      // Actualizar UI
+      renderizarMultiplicadores();
+      document.getElementById('diaActual').textContent = `Día ${dia - 1}`;
+      document.getElementById('recursoInicialDisplay').textContent = `$${(recursoInicialDia1 || 0).toFixed(2)}`;
+      document.getElementById('gananciaDisplay').textContent = `$${gananciaTotal.toFixed(2)}`;
+      document.getElementById('totalConGananciaDisplay').textContent = `$${nuevoPatrimonio.toFixed(2)}`;
+      document.getElementById('factorAjusteDisplay').textContent = factorAjuste.toFixed(4);
+
+      // Mostrar botón del gráfico
+      document.getElementById('graficoBtn').classList.remove('hidden');
+
+      // Actualizar historial UI y comparativa
+      renderHistorial();
+      actualizarComparativa();
+
+      // Trigger a visual refresh
+      document.querySelector('main').style.animation = 'none';
+      setTimeout(() => document.querySelector('main').style.animation = 'fadeInDelay 0.3s ease-out', 10);
+    }
+
+    // Añade una entrada al historial y actualiza la vista del historial y comparativa
+    function agregarAlHistorial(datos) {
+      historial.unshift(datos);
+      renderHistorial();
+      actualizarComparativa();
+    }
+
+    // Renderiza el panel de historial (`#historialList`) a partir del array `historial`
+    function renderHistorial() {
+      const cont = document.getElementById('historialList');
+      cont.innerHTML = '';
+      if (!historial || historial.length === 0) {
+        cont.innerHTML = `
+          <div class="text-center text-soft-gray-500 py-8">
+            <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+              </path>
+            </svg>
+            <p class="font-medium">Sin simulaciones aún</p>
+            <p class="text-sm">Ejecuta una simulación para ver el historial</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Crear entradas del historial
+      historial.forEach(item => {
+        const node = document.createElement('div');
+        node.className = 'flex items-center justify-between p-3 border-b border-soft-gray-100';
+        node.innerHTML = `
+          <div>
+            <div class="text-sm font-medium text-soft-gray-700">Día ${item.dia}</div>
+            <div class="text-xs text-soft-gray-500">Ganancia: $${(+item.ganancia).toFixed(2)}</div>
+          </div>
+          <div class="text-right">
+            <div class="text-sm font-bold text-soft-gray-800">$${(+item.total).toFixed(2)}</div>
+            <div class="text-xs text-soft-gray-500">Factor: ${(+item.factor).toFixed(4)}</div>
+          </div>
+        `;
+        cont.appendChild(node);
+      });
+    }
+
+    // Actualiza la sección "Comparativa vs Día 1" con valores seguros (maneja ceros)
+    function actualizarComparativa() {
+      const diferencia = (recursoInicialDia1 && recursoInicialDia1 > 0) ? +((patrimonioActual || recursoInicialDia1) - recursoInicialDia1).toFixed(2) : 0;
+      const porcentaje = (recursoInicialDia1 && recursoInicialDia1 > 0) ? +((((patrimonioActual || recursoInicialDia1) - recursoInicialDia1) / recursoInicialDia1) * 100).toFixed(2) : 0;
+
+      // Nuevo porcentaje: cambio relativo del Nivel 1 comparado con el Día 1
+      const entradaBaseDia1 = (initialMultiplicadores && initialMultiplicadores.length > 0) ? initialMultiplicadores[0] : ((multiplicadores && multiplicadores.length > 0) ? multiplicadores[0] : 0);
+      const nivel1Dia1 = (initialMultiplicadores && initialMultiplicadores.length > 1) ? initialMultiplicadores[1] : ((multiplicadores && multiplicadores.length > 1) ? multiplicadores[1] : entradaBaseDia1);
+      const nivel1Actual = (multiplicadores && multiplicadores.length > 1) ? multiplicadores[1] : entradaBaseDia1;
+      const nuevoPct = (nivel1Dia1 && nivel1Dia1 > 0) ? +(((nivel1Actual - nivel1Dia1) / nivel1Dia1) * 100).toFixed(2) : 0;
+
+      document.getElementById('diferenciaDia1Display').textContent = `$${diferencia >= 0 ? '+' : ''}${diferencia.toFixed(2)}`;
+      document.getElementById('porcentajeCambioDisplay').textContent = `${porcentaje >= 0 ? '+' : ''}${porcentaje.toFixed(2)}%`;
+      document.getElementById('nuevoPorcentajeDisplay').textContent = `${nuevoPct >= 0 ? '+' : ''}${nuevoPct.toFixed(2)}%`;
+    }
+
+    // Funciones del gráfico
+    function abrirGrafico() {
+      const modal = document.getElementById('graficoModal');
+      modal.classList.remove('hidden');
+
+      // Actualizar métricas del gráfico
+      document.getElementById('capitalInicialGrafico').textContent = `$${recursoInicialDia1.toFixed(2)}`;
+
+      if (historial.length > 0) {
+        const ultimaGanancia = historial[0].ganancia;
+        const totalActual = historial[0].total;
+        const crecimientoTotal = ((totalActual - recursoInicialDia1) / recursoInicialDia1 * 100).toFixed(2);
+
+        document.getElementById('gananciaDiaGrafico').textContent = `$${ultimaGanancia}`;
+        document.getElementById('totalAcumuladoGrafico').innerHTML = `
+          $${totalActual.toFixed(2)}<br>
+          <span class="text-sm ${crecimientoTotal >= 0 ? 'text-green-600' : 'text-red-600'}">
+            ${crecimientoTotal >= 0 ? '+' : ''}${crecimientoTotal}% vs inicial
+          </span>
+        `;
+      } else {
+        document.getElementById('gananciaDiaGrafico').textContent = '$0.00';
+        document.getElementById('totalAcumuladoGrafico').textContent = `$${(patrimonioActual || recursoInicial).toFixed(2)}`;
+      }
+
+      // Resetear navegación del gráfico
+      paginaActual = Math.max(0, Math.ceil(historial.length / diasPorPagina) - 1); // Empezar en la última página
+
+      // Actualizar controles inmediatamente
+      actualizarControlesNavegacion();
+
+      // Dibujar gráfico con delay para asegurar que el modal esté visible
+      setTimeout(() => {
+        dibujarGrafico();
+        actualizarControlesNavegacion(); // Actualizar otra vez después de dibujar
+      }, 100);
+    }
+
+    function cerrarGrafico() {
+      document.getElementById('graficoModal').classList.add('hidden');
+    }
+
+    // Variables globales para el gráfico
+    let chartInstance = null;
+    let diasPorPagina = 10; // Número de días a mostrar por vez
+    let paginaActual = 0; // Página actual (empezando en 0)
+
+    function navegarGrafico(direccion) {
+      const totalPaginas = Math.ceil(historial.length / diasPorPagina);
+
+      if (direccion === 'anterior' && paginaActual > 0) {
+        paginaActual--;
+      } else if (direccion === 'siguiente' && paginaActual < totalPaginas - 1) {
+        paginaActual++;
+      }
+
+      dibujarGrafico();
+      actualizarControlesNavegacion();
+    }
+
+    function actualizarControlesNavegacion() {
+      const totalPaginas = Math.ceil(historial.length / diasPorPagina);
+      const inicio = paginaActual * diasPorPagina + 1;
+      const fin = Math.min((paginaActual + 1) * diasPorPagina, historial.length);
+
+      // Actualizar textos
+      document.getElementById('rangoActual').textContent = `${inicio} - ${fin}`;
+      document.getElementById('totalDias').textContent = historial.length;
+
+      // Actualizar botones
+      document.getElementById('btnAnterior').disabled = paginaActual === 0;
+      document.getElementById('btnSiguiente').disabled = paginaActual >= totalPaginas - 1;
+
+      // Mostrar/ocultar controles - Mostrar cuando hay múltiples páginas
+      const controles = document.getElementById('controlesNavegacion');
+      if (totalPaginas > 1) {
+        controles.classList.remove('hidden');
+      } else {
+        controles.classList.add('hidden');
+      }
+    }
+
+    function dibujarGrafico() {
+      const ctx = document.getElementById('graficoCanvas').getContext('2d');
+
+      // Destruir gráfico anterior si existe
+      if (chartInstance) {
+        chartInstance.destroy();
+      }
+
+      if (historial.length === 0) {
+        // Mostrar mensaje si no hay datos
+        ctx.font = '16px Montserrat';
+        ctx.fillStyle = '#64748b';
+        ctx.textAlign = 'center';
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        ctx.fillText('No hay datos para mostrar', ctx.canvas.width / 2, ctx.canvas.height / 2);
+        return;
+      }
+
+      // Preparar datos cronológicamente
+      const todosLosDatos = historial.slice().reverse();
+
+      // Calcular el rango de datos a mostrar (paginación)
+      const inicio = paginaActual * diasPorPagina;
+      const fin = Math.min(inicio + diasPorPagina, todosLosDatos.length);
+      const datos = todosLosDatos.slice(inicio, fin);
+
+      const labels = datos.map(item => `Día ${item.dia}`);
+      const ganancias = datos.map(item => item.ganancia);
+      const totales = datos.map(item => item.total);
+      const capitalInicial = new Array(datos.length).fill(recursoInicialDia1);
+
+      // Configuración del gráfico
+      const config = {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Capital Inicial',
+              data: capitalInicial,
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              borderWidth: 3,
+              borderDash: [10, 5],
+              pointRadius: 0,
+              pointHoverRadius: 6,
+              fill: false,
+              tension: 0
+            },
+            {
+              label: 'Ganancia Diaria',
+              data: ganancias,
+              backgroundColor: 'rgba(59, 130, 246, 0.8)',
+              borderColor: '#3b82f6',
+              borderWidth: 2,
+              type: 'bar',
+              yAxisID: 'y1',
+              borderRadius: 8,
+              borderSkipped: false,
+            },
+            {
+              label: 'Total Acumulado',
+              data: totales,
+              borderColor: '#8b5cf6',
+              backgroundColor: 'rgba(139, 92, 246, 0.1)',
+              borderWidth: 4,
+              pointRadius: 8,
+              pointHoverRadius: 12,
+              pointBackgroundColor: '#8b5cf6',
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 3,
+              fill: true,
+              tension: 0.4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false,
+          },
+          plugins: {
+            title: {
+              display: true,
+              text: 'Evolución del Rendimiento de Martingala',
+              font: {
+                family: 'Montserrat',
+                size: 18,
+                weight: 'bold'
+              },
+              color: '#1e293b',
+              padding: {
+                top: 10,
+                bottom: 30
+              }
+            },
+            legend: {
+              display: true,
+              position: 'top',
+              labels: {
+                font: {
+                  family: 'Montserrat',
+                  size: 12,
+                  weight: '500'
+                },
+                color: '#64748b',
+                padding: 20,
+                usePointStyle: true,
+                pointStyle: 'circle'
+              }
+            },
+            tooltip: {
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              titleColor: '#1e293b',
+              bodyColor: '#475569',
+              borderColor: '#e2e8f0',
+              borderWidth: 2,
+              cornerRadius: 12,
+              displayColors: true,
+              font: {
+                family: 'Montserrat',
+                size: 12
+              },
+              titleFont: {
+                family: 'Montserrat',
+                size: 14,
+                weight: 'bold'
+              },
+              callbacks: {
+                title: function (context) {
+                  return context[0].label;
+                },
+                label: function (context) {
+                  const label = context.dataset.label || '';
+                  const value = context.parsed.y;
+
+                  if (label === 'Capital Inicial') {
+                    return `${label}: $${value.toFixed(2)} (Referencia)`;
+                  } else if (label === 'Ganancia Diaria') {
+                    const porcentaje = ((value / recursoInicialDia1) * 100).toFixed(2);
+                    return `${label}: $${value.toFixed(2)} (+${porcentaje}%)`;
+                  } else if (label === 'Total Acumulado') {
+                    const diferencia = (value - recursoInicialDia1).toFixed(2);
+                    const porcentajeTotal = (((value - recursoInicialDia1) / recursoInicialDia1) * 100).toFixed(2);
+                    return [
+                      `${label}: $${value.toFixed(2)}`,
+                      `Diferencia: $${diferencia >= 0 ? '+' : ''}${diferencia}`,
+                      `Crecimiento: ${porcentajeTotal >= 0 ? '+' : ''}${porcentajeTotal}%`
+                    ];
+                  }
+                  return `${label}: $${value.toFixed(2)}`;
+                },
+                footer: function (context) {
+                  if (context.length > 0) {
+                    const todosLosDatos = historial.slice().reverse();
+                    const inicio = paginaActual * diasPorPagina;
+                    const datosActuales = todosLosDatos.slice(inicio, inicio + diasPorPagina);
+                    const datos = datosActuales[context[0].dataIndex];
+                    return `Factor de ajuste: ${datos.factor}`;
+                  }
+                  return '';
+                }
+              },
+              padding: 16
+            }
+          },
+          scales: {
+            x: {
+              display: true,
+              title: {
+                display: true,
+                text: 'Días de Simulación',
+                font: {
+                  family: 'Montserrat',
+                  size: 14,
+                  weight: '600'
+                },
+                color: '#475569'
+              },
+              grid: {
+                color: 'rgba(226, 232, 240, 0.5)',
+                lineWidth: 1
+              },
+              ticks: {
+                font: {
+                  family: 'Montserrat',
+                  size: 12
+                },
+                color: '#64748b'
+              }
+            },
+            y: {
+              display: true,
+              position: 'left',
+              title: {
+                display: true,
+                text: 'Valor Total ($)',
+                font: {
+                  family: 'Montserrat',
+                  size: 14,
+                  weight: '600'
+                },
+                color: '#475569'
+              },
+              grid: {
+                color: 'rgba(226, 232, 240, 0.3)',
+                lineWidth: 1
+              },
+              ticks: {
+                font: {
+                  family: 'Montserrat',
+                  size: 12
+                },
+                color: '#64748b',
+                callback: function (value) {
+                  return '$' + value.toFixed(0);
+                }
+              },
+              beginAtZero: false
+            },
+            y1: {
+              type: 'linear',
+              display: true,
+              position: 'right',
+              title: {
+                display: true,
+                text: 'Ganancia Diaria ($)',
+                font: {
+                  family: 'Montserrat',
+                  size: 14,
+                  weight: '600'
+                },
+                color: '#3b82f6'
+              },
+              grid: {
+                drawOnChartArea: false,
+              },
+              ticks: {
+                font: {
+                  family: 'Montserrat',
+                  size: 12
+                },
+                color: '#3b82f6',
+                callback: function (value) {
+                  return '$' + value.toFixed(0);
+                }
+              },
+              beginAtZero: true
+            }
+          },
+          animation: {
+            duration: 1500,
+            easing: 'easeInOutQuart'
+          },
+          elements: {
+            point: {
+              hoverBackgroundColor: '#ffffff',
+              hoverBorderWidth: 4
+            },
+            bar: {
+              borderWidth: 2,
+              borderRadius: 8,
+              borderSkipped: false
+            }
+          }
+        }
+      };
+
+      chartInstance = new Chart(ctx, config);
+    }
+
+    // Configuración desde UI
+    function abrirConfiguracion() {
+      const modal = document.getElementById('configModal');
+      modal.classList.remove('hidden');
+      document.getElementById('cfg1Payout').value = payout;
+      // Predeterminados solicitados: cantidad de martingalas = 5, entradas vacío
+      document.getElementById('cfg1Entradas').value = '';
+      // defaults
+      document.getElementById('cfg1Cantidad').value = 5;
+      document.getElementById('cfg1Multiplier').value = 120;
+      // sincronizar campos con los multiplicadores actuales si existen (fuente de verdad)
+      syncConfig1UI();
+      // sincronizar payout en Config 2
+      const cfg2p = document.getElementById('cfg2Payout');
+      if (cfg2p) cfg2p.value = payout;
+      const selected = document.querySelector('input[name="configTipo"]:checked');
+      mostrarTabConfig(selected ? selected.value : 1);
+    }
+
+    function cerrarConfiguracion() {
+      document.getElementById('configModal').classList.add('hidden');
+    }
+
+    function mostrarTabConfig(n) {
+      n = parseInt(n);
+      if (n === 1) {
+        document.getElementById('config1').classList.remove('hidden');
+        document.getElementById('config2').classList.add('hidden');
+      } else {
+        document.getElementById('config1').classList.add('hidden');
+        document.getElementById('config2').classList.remove('hidden');
+      }
+    }
+
+    function generarCamposConfig1() {
+      // Mostrar solo la entrada Base inicialmente. Los niveles se generan al previsualizar.
+      const cont = document.getElementById('cfg1Multiplicadores');
+      cont.innerHTML = '';
+      const baseVal = (multiplicadores && multiplicadores.length > 0) ? multiplicadores[0] : '';
+      const wrapper = document.createElement('div');
+      wrapper.className = 'flex items-center space-x-2';
+      wrapper.innerHTML = `
+        <label class="w-24 text-sm">Base</label>
+        <input id="cfg1Mult_0" type="number" step="0.01" min="0" value="${baseVal !== '' ? (+baseVal).toFixed(2) : ''}" class="flex-1 rounded-lg border p-2" />
+      `;
+      cont.appendChild(wrapper);
+    }
+
+    function aplicarConfiguracion() {
+      const tipo = parseInt(document.querySelector('input[name="configTipo"]:checked').value);
+      if (tipo === 1) {
+        // Preferir valores ya generados (después de Previsualizar). Si no existen, calcular a partir de Base+Multiplicador+Cantidad.
+        const levels = Math.max(1, parseInt(document.getElementById('cfg1Cantidad').value) || 1);
+        const total = levels + 1; // Base + levels
+        const newMult = [];
+
+        // Si existen inputs generados por la previsualización, leerlos
+        let generated = true;
+        for (let i = 0; i < total; i++) {
+          if (!document.getElementById(`cfg1Mult_${i}`)) {
+            generated = false;
+            break;
+          }
+        }
+
+        if (generated) {
+          for (let i = 0; i < total; i++) {
+            const v = parseFloat(document.getElementById(`cfg1Mult_${i}`).value) || 0;
+            newMult.push(+v.toFixed(2));
+          }
+        } else {
+          // Calcular niveles desde Base + Multiplicador (%)
+          const base = parseFloat(document.getElementById('cfg1Mult_0').value) || 0;
+          const mulPercent = parseFloat(document.getElementById('cfg1Multiplier').value) || 0;
+          const factor = 1 + (mulPercent / 100);
+          for (let i = 0; i < total; i++) {
+            const val = +(base * Math.pow(factor, i)).toFixed(2);
+            newMult.push(val);
+          }
+        }
+
+        multiplicadores = newMult;
+        payout = parseFloat(document.getElementById('cfg1Payout').value) || payout;
+        // Si el usuario dejó entradas vacío, no lo forzamos; si puso valor lo aplicamos
+        const entradasVal = document.getElementById('cfg1Entradas').value.trim();
+        if (entradasVal !== '') entriesCount = Math.max(1, parseInt(entradasVal) || entriesCount);
+        recursoInicial = multiplicadores.reduce((a, b) => a + b, 0);
+        recursoInicialDia1 = recursoInicial;
+        patrimonioActual = recursoInicialDia1;
+        initialMultiplicadores = multiplicadores.slice();
+        historial = [];
+        dia = 1;
+        renderizarMultiplicadores();
+        actualizarInterfaz();
+        actualizarComparativa();
+        renderHistorial();
+        cerrarConfiguracion();
+        // sincronizar UI de Config 1 con los valores aplicados
+        syncConfig1UI();
+        return;
+      }
+
+      // Config 2
+      // Validar campos obligatorios en Config 2 (USD disponible, multiplicador y cantidad). USD ganancia es opcional.
+      const usdDisponibleField = document.getElementById('cfg2UsdDisponible').value.trim();
+      const usdGananciaField = document.getElementById('cfg2UsdGanancia').value.trim();
+      const mulField = document.getElementById('cfg2Mul').value.trim();
+      const countField = document.getElementById('cfg2Cantidad').value.trim();
+      if (!usdDisponibleField || !mulField || !countField) {
+        alert('En Configuración 2 los campos obligatorios son: USD disponible, Multiplicador (%) y Cantidad de martingalas. USD ganancia es opcional.');
+        return;
+      }
+      const usdDisponible = parseFloat(usdDisponibleField) || 0;
+      const usdGanancia = parseFloat(usdGananciaField) || 0;
+      const usd = usdDisponible + usdGanancia; // total usado para calcular la base
+      const mul = parseFloat(mulField) || 0;
+      const requestedMartingalas = Math.max(1, parseInt(countField) || 1); // number of martingalas (excludes base)
+      const factor = 1 + (mul / 100);
+      const newMult = [];
+      let sum = 0;
+      // Calcular entrada base de forma que Base + Nivel1..NivelM sumen <= USD (usamos igualdad)
+      // Fórmula: total = base * (factor^(m+1) - 1) / (factor - 1) => base = USD * (factor - 1) / (factor^(m+1) - 1)
+      const m = requestedMartingalas;
+      const denom = Math.pow(factor, m + 1) - 1; // m martingalas + base => exponent m+1
+      const baseToUse = denom > 0 ? (usd * (factor - 1) / denom) : usd;
+
+      // Generar multiplicadores: primero base, luego Nivel 1..M (base * factor^k)
+      newMult.push(+baseToUse.toFixed(2));
+      sum += +baseToUse.toFixed(2);
+      for (let k = 1; k <= requestedMartingalas; k++) {
+        const val = +(baseToUse * Math.pow(factor, k)).toFixed(2);
+        newMult.push(val);
+        sum += val;
+      }
+
+      // Update readonly field with calculated base
+      document.getElementById('cfg2Base').value = (+baseToUse).toFixed(2);
+
+      // Read cantidad de entradas configurada en Config 2 (si la hay) and apply
+      const entradasCfg2 = document.getElementById('cfg2Entradas') ? document.getElementById('cfg2Entradas').value.trim() : '';
+      if (entradasCfg2 !== '') {
+        entriesCount = Math.max(1, parseInt(entradasCfg2) || entriesCount);
+      }
+
+      multiplicadores = newMult;
+      multiplicadores = newMult;
+      recursoInicial = multiplicadores.reduce((a, b) => a + b, 0);
+      recursoInicialDia1 = recursoInicial;
+      patrimonioActual = recursoInicialDia1;
+      initialMultiplicadores = multiplicadores.slice();
+      historial = [];
+      dia = 1;
+      renderizarMultiplicadores();
+      actualizarInterfaz();
+      actualizarComparativa();
+      renderHistorial();
+      cerrarConfiguracion();
+      // sincronizar UI de Config 1 con los valores aplicados
+      syncConfig1UI();
+    }
+
+    function previsualizarConfig2() {
+      const usdDisponibleField = document.getElementById('cfg2UsdDisponible').value.trim();
+      const usdGananciaField = document.getElementById('cfg2UsdGanancia').value.trim();
+      const mulField = document.getElementById('cfg2Mul').value.trim();
+      const countField = document.getElementById('cfg2Cantidad').value.trim();
+      if (!usdDisponibleField || !mulField || !countField) {
+        document.getElementById('cfg2Preview').innerHTML = 'Rellena USD disponible, Multiplicador (%) y Cantidad de martingalas para previsualizar. USD ganancia es opcional.';
+        return;
+      }
+      const usdDisponible = parseFloat(usdDisponibleField) || 0;
+      const usdGanancia = parseFloat(usdGananciaField) || 0;
+      const usd = usdDisponible + usdGanancia;
+      const mul = parseFloat(mulField) || 0;
+      const baseInput = document.getElementById('cfg2Base').value.trim();
+      const requestedCount = parseInt(countField) || null;
+      const factor = 1 + (mul / 100);
+      let sum = 0;
+      const preview = [];
+
+      // requestedCount = number of martingalas (excludes base)
+      const m = requestedCount;
+      let baseToUse = null;
+      // Compute base so that Base + Nivel1..NivelM sum equals USD (geometric series with m+1 terms)
+      const denom = Math.pow(factor, m + 1) - 1; // m martingalas + base => exponent m+1
+      baseToUse = denom > 0 ? (usd * (factor - 1) / denom) : usd;
+
+      // Build preview: Base (i=0) and Nivel 1..M (i=1..M)
+      for (let i = 0; i <= m; i++) {
+        const val = +(baseToUse * Math.pow(factor, i)).toFixed(2);
+        preview.push(val);
+        sum += val;
+      }
+
+      const maxLevels = m; // number of martingalas (excludes base)
+      const totalReq = (+sum).toFixed(2);
+      // Fill calculated entrada base and show preview
+      document.getElementById('cfg2Base').value = (+baseToUse).toFixed(2);
+      const labeled = preview.map((v, i) => (i === 0 ? `Base: $${(+v).toFixed(2)}` : `Nivel ${i}: $${(+v).toFixed(2)}`));
+      document.getElementById('cfg2Preview').innerHTML = `Entrada base: $${(+baseToUse).toFixed(2)}<br>Niveles: ${maxLevels} — Suma requerida: $${totalReq}<br>${labeled.join('<br>')}`;
+    }
+
+    // Previsualizar Config 1: generar niveles a partir de Base + Multiplicador (%) + Cantidad
+    function previsualizarConfig1() {
+      // Allow empty fields and fallback to current multiplicadores when available
+      const baseInputEl = document.getElementById('cfg1Mult_0');
+      const baseField = baseInputEl ? baseInputEl.value.trim() : '';
+      const mulField = document.getElementById('cfg1Multiplier').value.trim();
+      const countField = document.getElementById('cfg1Cantidad').value.trim();
+
+      // Fallbacks
+      const baseFallback = (multiplicadores && multiplicadores.length > 0) ? multiplicadores[0] : '';
+      const mulFallback = (multiplicadores && multiplicadores.length > 1 && multiplicadores[0] > 0) ? (((multiplicadores[1] / multiplicadores[0]) - 1) * 100) : '';
+      const countFallback = (multiplicadores && multiplicadores.length > 0) ? Math.max(1, multiplicadores.length - 1) : 5;
+
+      const base = parseFloat(baseField || baseFallback) || 0;
+      const mul = parseFloat(mulField || mulFallback) || 0;
+      const n = Math.max(1, parseInt(countField || countFallback) || 1);
+      const factor = 1 + (mul / 100);
+
+      // If multiplicadores exist and the user didn't change Base or Multiplier
+      // prefer to show the exact stored multiplicadores (source of truth) to avoid rounding mismatches.
+      const preview = [];
+      let sum = 0;
+      const total = n + 1; // base + n niveles
+      const mulComputed = (multiplicadores && multiplicadores.length > 1 && multiplicadores[0] > 0) ? (((multiplicadores[1] / multiplicadores[0]) - 1) * 100) : null;
+      const baseMatches = multiplicadores && multiplicadores.length > 0 && Math.abs((+multiplicadores[0]) - (+base)) < 0.005;
+      const mulMatches = (mulComputed !== null) ? Math.abs((+mulComputed) - (+mul)) < 0.0005 : false;
+
+      // Use stored multiplicadores when they exist and the user didn't effectively change Base/Multiplier (tolerance)
+      if (multiplicadores && multiplicadores.length >= total && baseMatches && (mulField === '' || mulMatches)) {
+        for (let i = 0; i < total; i++) {
+          const val = +(multiplicadores[i]).toFixed(2);
+          preview.push(val);
+          sum += val;
+        }
+      } else {
+        for (let i = 0; i < total; i++) {
+          const val = +(base * Math.pow(factor, i)).toFixed(2);
+          preview.push(val);
+          sum += val;
+        }
+      }
+
+      // Mostrar los inputs (Base + Niveles) para que el usuario pueda revisar/editar antes de aceptar
+      const cont = document.getElementById('cfg1Multiplicadores');
+      cont.innerHTML = '';
+      preview.forEach((v, i) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'flex items-center space-x-2';
+        // Align labels with dashboard: index 0 -> Base, index 1 -> Nivel 1, index 2 -> Nivel 2, etc.
+        const labelText = (i === 0) ? 'Base' : `Nivel ${i}`;
+        wrapper.innerHTML = `
+          <label class="w-24 text-sm">${labelText}</label>
+          <input id="cfg1Mult_${i}" type="number" step="0.01" min="0" value="${(+v).toFixed(2)}" class="flex-1 rounded-lg border p-2" />
+        `;
+        cont.appendChild(wrapper);
+      });
+
+      // Mostrar resumen
+      const summary = document.createElement('div');
+      summary.className = 'text-sm text-soft-gray-600 mt-2';
+      summary.innerHTML = `Niveles generados: ${preview.length} — Suma requerida: $${(+sum).toFixed(2)}`;
+      cont.appendChild(summary);
+    }
+
+    // Sincroniza campos de Config 1 con los multiplicadores actuales (evita errores si se llama desde aplicarConfiguracion)
+    function syncConfig1UI() {
+      try {
+        const cantidadField = document.getElementById('cfg1Cantidad');
+        const entradasField = document.getElementById('cfg1Entradas');
+        const payoutField = document.getElementById('cfg1Payout');
+        const mulField = document.getElementById('cfg1Multiplier');
+        if (multiplicadores && multiplicadores.length > 0) {
+          cantidadField.value = Math.max(1, multiplicadores.length - 1);
+          // Set base input (regenerar solo la base visible)
+          const cont = document.getElementById('cfg1Multiplicadores');
+          cont.innerHTML = '';
+          const baseVal = multiplicadores[0];
+          const wrapper = document.createElement('div');
+          wrapper.className = 'flex items-center space-x-2';
+          wrapper.innerHTML = `
+            <label class="w-24 text-sm">Base</label>
+            <input id="cfg1Mult_0" type="number" step="0.01" min="0" value="${baseVal}" class="flex-1 rounded-lg border p-2" />
+          `;
+          cont.appendChild(wrapper);
+          // inferir multiplicador (%) desde los dos primeros niveles si existen (mayor precisión)
+          if (multiplicadores.length > 1 && multiplicadores[0] > 0) {
+            const factor = multiplicadores[1] / multiplicadores[0];
+            mulField.value = ((factor - 1) * 100).toFixed(6);
+          }
+          payoutField.value = payout;
+          entradasField.value = entriesCount || '';
+        }
+      } catch (e) {
+        // silencioso
+      }
+    }
+
+    // Cerrar modal del gráfico al hacer clic fuera
+    document.addEventListener('DOMContentLoaded', function () {
+      document.getElementById('graficoModal').addEventListener('click', function (e) {
+        if (e.target === this) {
+          cerrarGrafico();
+        }
+      });
+      // Nota: el modal de configuración NO se cerrará al hacer clic fuera; solo con la X
+    });
+  </script>
+</body>
+
 </html>
